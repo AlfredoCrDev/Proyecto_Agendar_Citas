@@ -76,35 +76,3 @@ while(ingreso == true){
 if(ingreso == false){
   alert("Gracias Por su Visita, regrese pronto :)")
 }
-
-// if (ingreso == true){
-//   let dia = prompt("Escriba el dia de la semana que desea agendar").toUpperCase();
-//   switch (dia) {
-//     case "LUNES":
-//       let horario = prompt("Escriba que horario prefiere, am o pm").toUpperCase();
-//       if(horario == AM){
-//         let horaAm = parseInt(prompt("tenemos hora disponible desde las 9 hasta las 11"))
-//       }
-//       break;
-//     case "MARTES":
-
-//       break;
-//     case "MIERCOLES":
-
-//       break;
-//     case "JUEVES":
-
-//       break;
-//     case "VIERNES":
-
-//       break;
-//     case "SABADO":
-
-//       break;
-//     case "DOMINGO":
-
-//       break;
-//     default:
-//       break;
-//   }
-// }
