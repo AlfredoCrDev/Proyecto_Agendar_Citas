@@ -1,4 +1,26 @@
-let ingreso = confirm("Bienvenido al sistema de agendar citas! ¿Desea agendar una hora?")
+class Servicio{
+  constructor(id, nombre, descripcion, precio){
+    this.id = id,
+    this.nombre = nombre,
+    this.descripcion = descripcion,
+    this.precio = precio
+  }
+}
+let servicio1 = new Servicio (1, "PACK LIFTING + TINTE DE PESTAÑAS", "WOW🌟 la pareja perfecta es sinónimo de un look perfecto Lifting + Tinte. Servicio ideal para pestañas cortas, mediana y largas. ¡SÚPER PRECIO!", 40);
+let servicio2 = new Servicio (2, "Lifting de pestañas", "¡Eleva tus pestañas al infinito hasta por 8 semanas! Servicio ideal para pestañas cortas, mediana y largas.", 37);
+let servicio3 = new Servicio (3, "Depilación de Cejas con pinzas", "Depilación de Cejas utilizando pinzas.", 12);
+let servicio4 = new Servicio (4, "Depilación de Cejas con hilo", "Depilación de Cejas utilizando la tecnica del hilo.", 17);
+let servicio5 = new Servicio (5, "Microblading", "Las cejas que siempre soñaste se hacen realidad gracias al Microblading, tecnica de hiperrealismo que simula los pelitos naturales de las cejas para conseguir unas cejas perfectas por mucho tiempo.", 159);
+let servicio6 = new Servicio (6, "Manicura rusa Completa Permanente", "¡MAYOR LIMPIEZA Y DURABILIDAD ! con esta innovadora tecnica rusa tendras unas uñas mas limpias, fuertes y duraderas.( Limpieza profunda + nivelacion de uña + base rubber de microfibras y vitaminas + esmaltado).", 76);
+let servicio7 = new Servicio (7, "Pedicura completa rusa semipermanente", "Pedicura completa rusa semipermanente.", 36);
+
+const listaServicios = [servicio1, servicio2, servicio3, servicio4, servicio5, servicio6]
+console.table(listaServicios)
+
+
+
+
+// let ingreso = confirm("Bienvenido al sistema de agendar citas! ¿Desea agendar una hora?")
 
 let servicios = (servicio, dia, hora)=>{
   switch (servicio) {
