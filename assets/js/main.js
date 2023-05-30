@@ -138,20 +138,13 @@ function guardarAgendamiento() {
 //ADMINISTRACION DE SERVICIOS
 //SUARIO Y CONTRASEÑA admin
 
-// Array para almacenar los objetos de datos
-let dataArray = [];
-
-// Función para verificar las credenciales y mostrar el formulario de datos
 function verifyCredentials(event) {
   event.preventDefault();
 
-  // Obtener los valores de usuario y contraseña ingresados
   let username = document.getElementById("username").value;
   let password = document.getElementById("password").value;
 
-  // Verificar las credenciales
   if (username === "admin" && password === "admin") {
-    // Mostrar el formulario de datos
     document.getElementById("dataForm").style.display = "block";
     mostrarServicios();
   } else {
@@ -159,31 +152,24 @@ function verifyCredentials(event) {
   }
 }
 
-// Función para enviar los datos al array
 function sendData(event) {
   event.preventDefault();
 
-  // Obtener los valores de los inputs
   let input1 = document.getElementById("nombreServicio").value;
   let input2 = document.getElementById("descServicio").value;
   let input3 = document.getElementById("precioServicio").value;
 
-  // Crear un objeto con los datos ingresados
   let servicio = new Servicio (input1, input2, input3);
   
-  // Agregar el objeto al array
   listaServicios.push(servicio);
   mostrarServicios(listaServicios);
 
-  // Limpiar los inputs
   document.getElementById("nombreServicio").value = "";
   document.getElementById("descServicio").value = "";
   document.getElementById("precioServicio").value = "";
 
-  // Mostrar el array en la consola (para verificar)
   console.log(listaServicios);
 }
 
-// Agregar eventos a los elementos del formulario
 document.getElementById("loginForm").addEventListener("submit", verifyCredentials);
 document.getElementById("sendButton").addEventListener("click", sendData);
