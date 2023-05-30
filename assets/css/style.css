@@ -1,6 +1,29 @@
-.contenedorMain__sectCard{
+.contenedorMain__sectCard {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
 }
 
+.formAdm {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    gap: 20px;
+}
+
+.formAdm input {
+    width: 30vw;
+    margin: 10px;
+}
+
+#loginForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#dataForm {
+position: relative;
+align-content: center;
+}
