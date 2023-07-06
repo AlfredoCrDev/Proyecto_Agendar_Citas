@@ -1,7 +1,7 @@
 
 window.addEventListener("DOMContentLoaded", () => {
-  mostrarServicios();
-  mostrarCarrito();
+  obtenerServicios();
+  cargarServiciosDesdeLocalStorage();
 });
 
 class Servicio{
@@ -12,164 +12,370 @@ class Servicio{
     this.img = img
   }
 }
-let servicio1 = new Servicio ("PACK LIFTING + TINTE DE PESTAÑAS", "WOW🌟 la pareja perfecta es sinónimo de un look perfecto Lifting + Tinte. Servicio ideal para pestañas cortas, mediana y largas. ¡SÚPER PRECIO!", 40);
-let servicio2 = new Servicio ("LIFTING DE PESTAÑAS", "¡Eleva tus pestañas al infinito hasta por 8 semanas! Servicio ideal para pestañas cortas, mediana y largas.", 37);
-let servicio3 = new Servicio ("DEPILACIÓN DE CEJAS CON PINZAS", "Depilación de Cejas utilizando pinzas.", 12);
-let servicio4 = new Servicio ("DEPILACION DE CEJAS CON HILO", "Depilación de Cejas utilizando la tecnica del hilo.", 17);
-let servicio5 = new Servicio ("MICROBLADING", "Las cejas que siempre soñaste se hacen realidad gracias al Microblading, tecnica de hiperrealismo que simula los pelitos naturales de las cejas para conseguir unas cejas perfectas por mucho tiempo.", 159);
-let servicio6 = new Servicio ("MANICURA RUSA COMPLETA PERMANENTE", "¡MAYOR LIMPIEZA Y DURABILIDAD ! con esta innovadora tecnica rusa tendras unas uñas mas limpias, fuertes y duraderas.( Limpieza profunda + nivelacion de uña + base rubber de microfibras y vitaminas + esmaltado).", 76);
-let servicio7 = new Servicio ("PEDICURA COMPLETA RUSA SEMIPERMANENTE", "Pedicura completa rusa semipermanente.", 36);
 
-const listaServicios = [servicio1, servicio2, servicio3, servicio4, servicio5, servicio6, servicio7];
+function agregarNuevoServicio() {
+  Swal.fire({
+    title: "Agregar Nuevo Servicio",
+    html:
+      '<input id="nombre" class="swal2-input" placeholder="Nombre">' +
+      '<input id="descripcion" class="swal2-input" placeholder="Descripción">' +
+      '<input id="precio" type="number" class="swal2-input" placeholder="Precio $">',
+    focusConfirm: false,
+    preConfirm: () => {
+      const nombre = Swal.getPopup().querySelector("#nombre").value;
+      const descripcion = Swal.getPopup().querySelector("#descripcion").value;
+      const precio = Swal.getPopup().querySelector("#precio").value;
 
-function mostrarServicios() {
-  let contenedor = document.getElementById("contenedor");
-
-  contenedor.innerHTML = "";
-
-  for (const service of listaServicios) {
-    let servicioHTML = `
-      <div class="card" style="width: 18rem;">
-        <img src="${service.img}" class="card-img-top" alt="...">
-        <div class="card-body">
-          <h5 class="card-title">${service.nombre}</h5>
-          <p class="card-text">${service.descripcion}</p>
-          <p class="card-text">Precio: ${service.precio}</p>
-          <button onclick="agregarAlCarrito(${listaServicios.indexOf(
-            service
-          )})" class="btn btn-primary">Agregar al carrito</button>
-        </div>
-      </div>
-    `;
-
-    contenedor.innerHTML += servicioHTML;
-  }
+      if (!nombre || !precio) {
+        Swal.showValidationMessage("El campo Nombre y Precio es obligatorio");
+        return;
+      }
+      const nuevoServicio = new Servicio(nombre, descripcion, precio);
+      agregarServicio(nuevoServicio);
+      mostrarServicios(servicios);
+      Swal.fire(
+        'Tenemos Nuevo Servicio!',
+        `Tu servicio de ${nombre} fue agregado con exito`,
+        'success'
+      )
+    },
+  });
 }
 
-function agregarAlCarrito(servicioIndex) {
-  let servicioSeleccionado = listaServicios[servicioIndex];
+document.getElementById("btnNuevo").addEventListener("click", function(event) {
+  event.preventDefault
+  agregarNuevoServicio();
+})
 
-  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
-
-  carrito.push(servicioSeleccionado);
-
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-
-  mostrarCarrito();
+// Agregar un servicio al array de servicios
+function agregarServicio(service) {
+  servicios.push(service);
 }
 
-function mostrarCarrito() {
-  let carritoHTML = document.getElementById("carrito");
-  let totalHTML = document.getElementById("total");
+const contenedor = document.getElementById("contenedor");
 
-  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+// Constante para la ruta relativa del arcivo JSON que funcionará como API
+const ServiceApi = "../assets/bdd/servicios.json"
 
-  carritoHTML.innerHTML = "";
+let servicios = []; // Variable global para almacenar todos los servicios
+let serviciosFiltrados = []; // Variable global para almacenar los servicios filtrados
+let serviciosAgregados = []; // Variable global para los servicios agregados al carrito
 
-  let total = 0;
 
-  for (const servicio of carrito) {
-    let servicioHTML = `
-    <div class="table-responsive">
-    <table class="table table-dark table-hover">
-      <thead>
-        <tr>
-          <th scope="col">Nombre</th>
-          <th scope="col">Precio</th>
-          <th scope="col">Boton</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">${servicio.nombre}</th>
-          <td>${servicio.precio}</td>
-          <td><button onclick="eliminarDelCarrito(${carrito.indexOf(
-            servicio
-            )})" class="btn btn-danger">Eliminar</button></td>
-        </tr>
-      </tbody>
+// Obtener los servicios de la API y mostrarlos en la página
+function obtenerServicios() {
+  fetch(ServiceApi)
+    .then(respuesta => respuesta.json())
+    .then(datos => {
+      servicios = datos;
+      serviciosFiltrados = datos;
+      mostrarServicios(serviciosFiltrados);
+    })
+    .catch(error => console.log("Error fetch: ", error));
+}
+
+// Mostrar los servicios en la página
+function mostrarServicios(servicios) {
+  contenedor.innerHTML = '';
+
+  servicios.forEach(service => {
+    contenedor.innerHTML += `
+      <table class="table table-dark">
+        <thead>
+          <tr>
+            <th scope="col" class="col-2">Imagen</th>
+            <th scope="col" class="col-3">Nombre</th>
+            <th scope="col" class="col-4">Descripción</th>
+            <th scope="col" class="col-2">Precio</th>
+            <th scope="col" class="col-1">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="col-2"><img src="${service.img}" class="card-img-top" alt="..."></td>
+            <td class="col-3">${service.nombre}</td>
+            <td class="col-4">${service.descripcion}</td>
+            <td class="col-2">Precio: $ ${service.precio}</td>
+            <td class="col-1">
+              <button onclick="agregarAlCarrito('${service.nombre}', ${service.precio})" class="btn btn-primary">+</button>
+            </td>
+          </tr>
+        </tbody>
       </table>
-      </div>
     `;
+  });
+}
 
-    carritoHTML.innerHTML += servicioHTML;
-    total += servicio.precio;
+// <button onclick="agregarAlCarrito(${JSON.stringify(service)})" class="btn btn-primary">Agregar al carrito</button>
+
+// Evento para que funciones enter en el input de buscar
+document.getElementById("inputBuscar").addEventListener("keypress", function(event) {
+  if (event.key === "Enter") {
+    filtrarServicios();
+  }
+});
+
+// Evento para boton de buscar servicio
+document.getElementById("btnBuscar").addEventListener("click", function(event) {
+  event.preventDefault
+  filtrarServicios();
+})
+
+// Filtrar los servicios según el texto de búsqueda
+function filtrarServicios() {
+  const inputBuscar = document.getElementById('inputBuscar');
+  const textoBuscar = inputBuscar.value.toLowerCase();
+
+  serviciosFiltrados = servicios.filter(service => {
+    const nombreServicio = service.nombre.toLowerCase();
+    return nombreServicio.includes(textoBuscar);
+  });
+
+  mostrarServicios(serviciosFiltrados);
+}
+
+// Agregar un servicio al carrito
+function agregarAlCarrito(nombre, precio) {
+  // Agregar el servicio al array de servicios agregados
+  serviciosAgregados.push({ nombre, precio });
+
+  // Actualizar la lista de servicios agregados
+  mostrarServiciosAgregados();
+
+  // Calcular y mostrar el total del carrito
+  calcularTotal();
+
+  // Guardar los servicios agregados en el localStorage
+  guardarServiciosEnLocalStorage();
+}
+
+// Guardar los servicios agregados en el localStorage
+function guardarServiciosEnLocalStorage() {
+  localStorage.setItem('serviciosAgregados', JSON.stringify(serviciosAgregados));
+}
+
+// Cargar los servicios agregados desde el localStorage al cargar la página
+function cargarServiciosDesdeLocalStorage() {
+  const serviciosAgregadosGuardados = JSON.parse(localStorage.getItem('serviciosAgregados'));
+
+  if (serviciosAgregadosGuardados) {
+    serviciosAgregados = serviciosAgregadosGuardados;
   }
 
-  totalHTML.textContent = `Total: ${total}`;
+  // Actualizar la lista de servicios agregados y el total del carrito
+  mostrarServiciosAgregados();
+  calcularTotal();
 }
 
-function eliminarDelCarrito(servicioIndex) {
-  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+function procesarPago() {
+  const total = calcularTotal();
 
-  carrito.splice(servicioIndex, 1);
-
-  localStorage.setItem("carrito", JSON.stringify(carrito));
-
-  mostrarCarrito();
+  Swal.fire({
+    title: '¿Estas segura que quieres estos servicios?',
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Si',
+    denyButtonText: `No`,
+  }).then((result) => {
+    /* Read more about isConfirmed, isDenied below */
+    if (result.isConfirmed) {
+      Swal.fire(`Agendado el monto a pagar es: $${total}`, '', 'success')
+      serviciosAgregados = [];
+      mostrarServiciosAgregados();
+      calcularTotal();
+      guardarServiciosEnLocalStorage();
+    } else if (result.isDenied) {
+      Swal.fire('Regresando', '', 'info')
+    }
+  })
 }
 
-function abrirFormularioAgendamiento() {
-  let modal = document.getElementById("formularioModal");
-  let calendar = document.getElementById("calendario");
+// Mostrar la lista de servicios agregados
+function mostrarServiciosAgregados() {
+  const listaCarrito = document.getElementById('listaCarrito');
+  listaCarrito.innerHTML = '';
 
-  modal.style.display = "block";
-  calendar.style.display = "none";
-}
+  serviciosAgregados.forEach((service, index) => {
+    const listItem = document.createElement('li');
+    listItem.textContent = `${service.nombre} - Precio: $${service.precio}`;
 
-function cerrarFormularioAgendamiento() {
-  let modal = document.getElementById("formularioModal");
-  let calendar = document.getElementById("calendario");
+    // Crear el botón para quitar el servicio de la lista
+    const botonQuitar = document.createElement('button');
+    botonQuitar.textContent = 'Quitar';
+    botonQuitar.classList.add('btn', 'btn-danger');
+    botonQuitar.addEventListener('click', () => {
+      quitarServicio(index);
+    });
 
-  modal.style.display = "none";
-  calendar.style.display = "block";
-}
+    // Agregar el botón al elemento de la lista
+    listItem.appendChild(botonQuitar);
 
-function guardarAgendamiento() {
-  let fecha = document.getElementById("fecha").value;
-  let hora = document.getElementById("hora").value;
+    listaCarrito.appendChild(listItem);
+  });
 
-  document.getElementById("fechaAgendada").textContent = "Fecha agendada: " + fecha;
-  document.getElementById("horaAgendada").textContent = "Hora agendada: " + hora;
+  // Obtener el botón de Pagar
+  const botonPagar = document.getElementById('botonPagar');
 
-  cerrarFormularioAgendamiento();
-}
-
-//ADMINISTRACION DE SERVICIOS
-//SUARIO Y CONTRASEÑA admin
-
-function verifyCredentials(event) {
-  event.preventDefault();
-
-  let username = document.getElementById("username").value;
-  let password = document.getElementById("password").value;
-
-  if (username === "admin" && password === "admin") {
-    document.getElementById("dataForm").style.display = "block";
-    mostrarServicios();
+  if (serviciosAgregados.length === 0) {
+    botonPagar.disabled = true;
   } else {
-    alert("Credenciales incorrectas. Inténtalo de nuevo.");
+    botonPagar.disabled = false;
   }
 }
 
-function sendData(event) {
-  event.preventDefault();
+function quitarServicio(index) {
+  serviciosAgregados.splice(index, 1);
+  mostrarServiciosAgregados();
+  calcularTotal();
+  guardarServiciosEnLocalStorage();
+}
+// Calcular el total del carrito
+function calcularTotal() {
+  const totalCarrito = document.getElementById('totalCarrito');
 
-  let input1 = document.getElementById("nombreServicio").value;
-  let input2 = document.getElementById("descServicio").value;
-  let input3 = document.getElementById("precioServicio").value;
+  const total = serviciosAgregados.reduce((accumulatedTotal, service) => {
+    return accumulatedTotal + service.precio;
+  }, 0);
 
-  let servicio = new Servicio (input1, input2, input3);
-  
-  listaServicios.push(servicio);
-  mostrarServicios(listaServicios);
+  totalCarrito.textContent = total;
 
-  document.getElementById("nombreServicio").value = "";
-  document.getElementById("descServicio").value = "";
-  document.getElementById("precioServicio").value = "";
-
-  console.log(listaServicios);
+  return total;
 }
 
-document.getElementById("loginForm").addEventListener("submit", verifyCredentials);
-document.getElementById("sendButton").addEventListener("click", sendData);
+const botonPagar = document.createElement('button');
+botonPagar.textContent = 'Pagar';
+botonPagar.classList.add('btn', 'btn-primary');
+botonPagar.addEventListener('click', procesarPago);
+botonPagar.id = 'botonPagar';
+document.getElementById('carrito').appendChild(botonPagar);
+
+
+
+
+// function agregarAlCarrito(servicioIndex) {
+//   let servicioSeleccionado = listaServicios[servicioIndex];
+
+//   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+//   carrito.push(servicioSeleccionado);
+
+//   localStorage.setItem("carrito", JSON.stringify(carrito));
+
+//   mostrarCarrito();
+// }
+
+// function mostrarCarrito() {
+//   let carritoHTML = document.getElementById("carrito");
+//   let totalHTML = document.getElementById("total");
+
+//   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+//   carritoHTML.innerHTML = "";
+
+//   let total = 0;
+
+//   for (const servicio of carrito) {
+//     let servicioHTML = `
+//     <div class="table-responsive">
+//     <table class="table table-dark table-hover">
+//       <thead>
+//         <tr>
+//           <th scope="col">Nombre</th>
+//           <th scope="col">Precio</th>
+//           <th scope="col">Boton</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         <tr>
+//           <th scope="row">${servicio.nombre}</th>
+//           <td>${servicio.precio}</td>
+//           <td><button onclick="eliminarDelCarrito(${carrito.indexOf(
+//             servicio
+//             )})" class="btn btn-danger">Eliminar</button></td>
+//         </tr>
+//       </tbody>
+//       </table>
+//       </div>
+//     `;
+
+//     carritoHTML.innerHTML += servicioHTML;
+//     total += servicio.precio;
+//   }
+
+//   totalHTML.textContent = `Total: ${total}`;
+// }
+
+// function eliminarDelCarrito(servicioIndex) {
+//   let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+//   carrito.splice(servicioIndex, 1);
+
+//   localStorage.setItem("carrito", JSON.stringify(carrito));
+
+//   mostrarCarrito();
+// }
+
+// function abrirFormularioAgendamiento() {
+//   let modal = document.getElementById("formularioModal");
+//   let calendar = document.getElementById("calendario");
+
+//   modal.style.display = "block";
+//   calendar.style.display = "none";
+// }
+
+// function cerrarFormularioAgendamiento() {
+//   let modal = document.getElementById("formularioModal");
+//   let calendar = document.getElementById("calendario");
+
+//   modal.style.display = "none";
+//   calendar.style.display = "block";
+// }
+
+// function guardarAgendamiento() {
+//   let fecha = document.getElementById("fecha").value;
+//   let hora = document.getElementById("hora").value;
+
+//   document.getElementById("fechaAgendada").textContent = "Fecha agendada: " + fecha;
+//   document.getElementById("horaAgendada").textContent = "Hora agendada: " + hora;
+
+//   cerrarFormularioAgendamiento();
+// }
+
+// //ADMINISTRACION DE SERVICIOS
+// //SUARIO Y CONTRASEÑA admin
+
+// function verifyCredentials(event) {
+//   event.preventDefault();
+
+//   let username = document.getElementById("username").value;
+//   let password = document.getElementById("password").value;
+
+//   if (username === "admin" && password === "admin") {
+//     document.getElementById("dataForm").style.display = "block";
+//     mostrarServicios();
+//   } else {
+//     alert("Credenciales incorrectas. Inténtalo de nuevo.");
+//   }
+// }
+
+// function sendData(event) {
+//   event.preventDefault();
+
+//   let input1 = document.getElementById("nombreServicio").value;
+//   let input2 = document.getElementById("descServicio").value;
+//   let input3 = document.getElementById("precioServicio").value;
+
+//   let servicio = new Servicio (input1, input2, input3);
+  
+//   listaServicios.push(servicio);
+//   // mostrarServicios(listaServicios);
+
+//   document.getElementById("nombreServicio").value = "";
+//   document.getElementById("descServicio").value = "";
+//   document.getElementById("precioServicio").value = "";
+
+//   console.log(listaServicios);
+// }
+
+// document.getElementById("loginForm").addEventListener("submit", verifyCredentials);
+// document.getElementById("sendButton").addEventListener("click", sendData);
